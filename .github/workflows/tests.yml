@@ -70,6 +70,9 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Build core
+        run: pnpm --filter @bldmrk/core build
+
       - name: Build CLI
         run: pnpm --filter @bldmrk/cli build
 
