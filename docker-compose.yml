@@ -1,0 +1,30 @@
+services:
+  bldmrk:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./content:/app/content
+      - ./backups:/app/backups
+    environment:
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET required}
+      FOLIO_HUB_TOKEN: ${FOLIO_HUB_TOKEN:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  redis-data:

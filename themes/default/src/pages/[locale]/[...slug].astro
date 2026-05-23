@@ -1,0 +1,189 @@
+---
+import { getCollection, render } from 'astro:content'
+import type { CollectionEntry } from 'astro:content'
+import Default from '../../layouts/Default.astro'
+import Blog from '../../layouts/Blog.astro'
+import BlogPost from '../../layouts/BlogPost.astro'
+import Modular from '../../layouts/Modular.astro'
+
+type PageEntry = CollectionEntry<'pages'>
+
+export async function getStaticPaths() {
+  const SUPPORTED_LOCALES = ['de', 'en'] as const
+  type Locale = typeof SUPPORTED_LOCALES[number]
+  const DEFAULT_LOCALE: Locale = 'de'
+
+  function getCleanSlug(id: string): string {
+    return id
+      .replace(/\/index\.(md|mdx)$/, '')
+      .replace(/^index$/, '')
+      .split('/')
+      .map(seg => seg.replace(/^\d+--/, ''))
+      .filter(Boolean)
+      .join('/')
+  }
+
+  function getPageLocale(entry: PageEntry): Locale {
+    const i18nData = (entry.data as Record<string, unknown>).i18n as
+      | { locale?: string }
+      | undefined
+    const locale = i18nData?.locale
+    if (locale && (SUPPORTED_LOCALES as readonly string[]).includes(locale)) {
+      return locale as Locale
+    }
+    const firstSegment = entry.id.split('/')[0]
+    if ((SUPPORTED_LOCALES as readonly string[]).includes(firstSegment)) {
+      return firstSegment as Locale
+    }
+    return DEFAULT_LOCALE
+  }
+
+  function stripLocalePrefix(slug: string, locale: string): string {
+    return slug.startsWith(locale + '/') ? slug.slice(locale.length + 1) : slug
+  }
+
+  const allEntries = await getCollection('pages')
+  const published = allEntries.filter(e => e.data.published !== false)
+
+  // Only generate paths for non-default locales here.
+  // The default locale (de) is handled by [...slug].astro at the root.
+  const nonDefaultEntries = published.filter(e => getPageLocale(e) !== DEFAULT_LOCALE)
+
+  return nonDefaultEntries.map(entry => {
+    const locale = getPageLocale(entry)
+    const rawSlug = getCleanSlug(entry.id)
+    const cleanSlug = stripLocalePrefix(rawSlug, locale)
+
+    const slugDepth = cleanSlug ? cleanSlug.split('/').length : 0
+
+    const children = nonDefaultEntries
+      .filter(e => {
+        const eRaw = getCleanSlug(e.id)
+        const eSlug = stripLocalePrefix(eRaw, locale)
+        return (
+          eSlug !== cleanSlug &&
+          eSlug.startsWith(cleanSlug ? cleanSlug + '/' : '') &&
+          eSlug.split('/').length === slugDepth + 1
+        )
+      })
+      .map(e => ({
+        slug: stripLocalePrefix(getCleanSlug(e.id), locale),
+        data: e.data,
+      }))
+
+    const parentSlug = cleanSlug.split('/').slice(0, -1).join('/')
+    const siblings = nonDefaultEntries
+      .filter(e => {
+        const eRaw = getCleanSlug(e.id)
+        const eSlug = stripLocalePrefix(eRaw, locale)
+        const eParts = eSlug.split('/')
+        const entryParts = cleanSlug.split('/')
+        return (
+          eParts.length === entryParts.length &&
+          eSlug.startsWith(parentSlug ? parentSlug + '/' : '')
+        )
+      })
+      .sort((a, b) => a.id.localeCompare(b.id))
+
+    const siblingIdx = siblings.findIndex(e => {
+      const eRaw = getCleanSlug(e.id)
+      return stripLocalePrefix(eRaw, locale) === cleanSlug
+    })
+
+    const prevEntry = siblingIdx > 0 ? siblings[siblingIdx - 1] : undefined
+    const nextEntry = siblingIdx < siblings.length - 1 ? siblings[siblingIdx + 1] : undefined
+
+    // Build hreflang data for SEO
+    const hreflang: Array<{ locale: string; slug: string }> = [
+      { locale, slug: cleanSlug || '/' },
+    ]
+    // Try to find corresponding default-locale page
+    const defaultEquivalent = published.find(e => {
+      if (getPageLocale(e) !== DEFAULT_LOCALE) return false
+      return getCleanSlug(e.id) === cleanSlug
+    })
+    if (defaultEquivalent) {
+      hreflang.push({
+        locale: DEFAULT_LOCALE,
+        slug: getCleanSlug(defaultEquivalent.id) || '/',
+      })
+    }
+
+    return {
+      params: { locale, slug: cleanSlug || undefined },
+      props: {
+        entry,
+        locale,
+        children,
+        prev: prevEntry
+          ? {
+              slug: stripLocalePrefix(getCleanSlug(prevEntry.id), locale),
+              title: prevEntry.data.title,
+            }
+          : undefined,
+        next: nextEntry
+          ? {
+              slug: stripLocalePrefix(getCleanSlug(nextEntry.id), locale),
+              title: nextEntry.data.title,
+            }
+          : undefined,
+        hreflang,
+        defaultLocale: DEFAULT_LOCALE,
+      },
+    }
+  })
+}
+
+interface Props {
+  entry: PageEntry
+  locale: string
+  defaultLocale: string
+  children: Array<{ slug: string; data: { title: string; date?: Date; description?: string } }>
+  prev?: { slug: string; title: string }
+  next?: { slug: string; title: string }
+  hreflang: Array<{ locale: string; slug: string }>
+}
+
+const { entry, locale, defaultLocale, children, prev, next, hreflang } = Astro.props
+const { Content } = await render(entry)
+const { title, description, template, date, author, tags } = entry.data
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL ?? 'http://localhost:3000'
+
+function hreflangHref(loc: string, slug: string): string {
+  const normalised = slug === '/' ? '' : slug
+  if (loc === defaultLocale) return `${siteUrl}/${normalised}`
+  return `${siteUrl}/${loc}/${normalised}`
+}
+---
+
+{hreflang.map(({ locale: loc, slug }) => (
+  <link rel="alternate" hreflang={loc} href={hreflangHref(loc, slug)} slot="head" />
+))}
+<link
+  rel="alternate"
+  hreflang="x-default"
+  href={hreflangHref(defaultLocale, hreflang.find(h => h.locale === defaultLocale)?.slug ?? '/')}
+  slot="head"
+/>
+
+{template === 'blog' ? (
+  <Blog title={title} description={description}>
+    <Content />
+  </Blog>
+) : template === 'blog-post' ? (
+  <BlogPost title={title} description={description} date={date} author={author} tags={tags} prev={prev} next={next}>
+    <Content />
+  </BlogPost>
+) : template === 'modular' ? (
+  <Modular title={title} description={description}>
+    <Content />
+  </Modular>
+) : (
+  <Default title={title} description={description}>
+    <h1 class="text-4xl font-bold text-gray-900 mb-8">{title}</h1>
+    <div class="prose prose-gray max-w-none">
+      <Content />
+    </div>
+  </Default>
+)}

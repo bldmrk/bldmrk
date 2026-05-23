@@ -1,0 +1,12 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "@playwright/test"],
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
+    "paths": {
+      "@bldmrk/core": ["../../../core/src/index.ts"]
+    }
+  },
+  "include": ["./**/*.ts"]
+}

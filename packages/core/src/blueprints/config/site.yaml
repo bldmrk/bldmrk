@@ -1,0 +1,34 @@
+name: site
+label: Site Settings
+
+tabs:
+  - id: general
+    label: General
+    fields:
+      - name: name
+        type: text
+        label: Site Name
+        required: true
+      - name: description
+        type: textarea
+        label: Site Description
+      - name: url
+        type: text
+        label: Site URL
+        placeholder: https://example.com
+      - name: author
+        type: text
+        label: Default Author
+
+  - id: seo
+    label: SEO
+    fields:
+      - name: meta.title
+        type: text
+        label: Default Meta Title
+      - name: meta.description
+        type: textarea
+        label: Default Meta Description
+      - name: meta.image
+        type: image
+        label: Default Social Image

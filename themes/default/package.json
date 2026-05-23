@@ -1,0 +1,23 @@
+{
+  "name": "@bldmrk/theme-default",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "astro build",
+    "dev": "astro dev",
+    "preview": "astro preview",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.14",
+    "@astrojs/vue": "^4.5.0",
+    "astro": "^5.0.0",
+    "tailwindcss": "^4.0.0",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@tailwindcss/vite": "^4.0.0",
+    "typescript": "^5.9.3"
+  }
+}

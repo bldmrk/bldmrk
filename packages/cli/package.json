@@ -1,0 +1,30 @@
+{
+  "name": "@bldmrk/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "bldmrk": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@bldmrk/core": "workspace:*",
+    "@inquirer/prompts": "^7.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "citty": "^0.1.6",
+    "consola": "^3.2.3",
+    "js-yaml": "^4.1.1",
+    "simple-git": "^3.36.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.2",
+    "tsx": "^4.19.0"
+  }
+}

@@ -1,0 +1,61 @@
+---
+import Default from './Default.astro'
+
+interface NavLink {
+  slug: string
+  title: string
+}
+
+interface Props {
+  title: string
+  description?: string
+  date?: Date
+  author?: string
+  tags?: string[]
+  prev?: NavLink
+  next?: NavLink
+}
+const { title, description, date, author, tags, prev, next } = Astro.props
+---
+
+<Default title={title} description={description}>
+  <article>
+    <header class="mb-10 pb-8 border-b border-gray-200">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">{title}</h1>
+      <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+        {date && (
+          <time datetime={date.toISOString()}>
+            {date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </time>
+        )}
+        {author && <span>by {author}</span>}
+      </div>
+      {tags && tags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mt-4">
+          {tags.map(tag => (
+            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">#{tag}</span>
+          ))}
+        </div>
+      )}
+    </header>
+    <div class="prose prose-gray max-w-none">
+      <slot />
+    </div>
+    {(prev || next) && (
+      <nav class="mt-16 pt-8 border-t border-gray-200 flex justify-between gap-4">
+        {prev ? (
+          <a href={`/${prev.slug}`} class="flex-1 text-left group no-underline">
+            <span class="text-xs text-gray-500 block mb-1">← Previous</span>
+            <span class="font-medium text-gray-900 group-hover:text-[var(--color-primary)]">{prev.title}</span>
+          </a>
+        ) : <div class="flex-1" />}
+        {next && (
+          <a href={`/${next.slug}`} class="flex-1 text-right group no-underline">
+            <span class="text-xs text-gray-500 block mb-1">Next →</span>
+            <span class="font-medium text-gray-900 group-hover:text-[var(--color-primary)]">{next.title}</span>
+          </a>
+        )}
+      </nav>
+    )}
+  </article>
+</Default>

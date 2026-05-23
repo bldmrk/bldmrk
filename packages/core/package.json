@@ -1,0 +1,57 @@
+{
+  "name": "@bldmrk/core",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist", "src/blueprints", "src/starter", "README.md"],
+  "scripts": {
+    "build": "tsc && cp -r src/blueprints dist/blueprints && cp -r src/starter dist/starter",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@fastify/cors": "^11.2.0",
+    "@fastify/helmet": "^12.0.0",
+    "@fastify/multipart": "^10.0.0",
+    "@fastify/rate-limit": "^10.3.0",
+    "@mdx-js/mdx": "^3.1.1",
+    "archiver": "^7.0.1",
+    "argon2": "^0.44.0",
+    "basic-ftp": "^5.0.5",
+    "chokidar": "^5.0.0",
+    "fastify": "^5.8.5",
+    "fastify-plugin": "^5.0.1",
+    "ioredis": "^5.6.1",
+    "flexsearch": "^0.8.212",
+    "gray-matter": "^4.0.3",
+    "jose": "^6.2.3",
+    "js-yaml": "^4.1.1",
+    "nodemailer": "^6.9.16",
+    "node-cron": "^4.2.1",
+    "remark-gfm": "^4.0.1",
+    "sharp": "^0.34.5",
+    "simple-git": "^3.36.0",
+    "unified": "^11.0.5",
+    "unzipper": "^0.12.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/archiver": "^6.0.3",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^25.6.2",
+    "@types/node-cron": "^3.0.11",
+    "@types/sharp": "^0.32.0",
+    "@types/unzipper": "^0.10.10",
+    "@types/nodemailer": "^6.4.17",
+    "memfs": "^4.57.2",
+    "pino-pretty": "^13.0.0"
+  }
+}

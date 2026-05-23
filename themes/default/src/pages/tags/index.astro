@@ -1,0 +1,58 @@
+---
+import Default from '../../layouts/Default.astro'
+import TagCloud from '../../components/TagCloud.vue'
+
+interface TaxonomyEntry {
+  value: string
+  count: number
+  slug: string
+}
+
+const API_URL = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:3000'
+
+let tags: TaxonomyEntry[] = []
+try {
+  const res = await fetch(`${API_URL}/api/taxonomy/tags`)
+  if (res.ok) {
+    tags = await res.json()
+  }
+} catch {
+  // API unreachable at build time — render with empty list
+}
+
+const totalPages = tags.reduce((sum, t) => sum + t.count, 0)
+---
+
+<Default title="Tags" description="Browse all content tags">
+  <div class="space-y-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Tags</h1>
+      <p class="text-gray-500">
+        {tags.length} tag{tags.length !== 1 ? 's' : ''} across {totalPages} page{totalPages !== 1 ? 's' : ''}
+      </p>
+    </div>
+
+    {tags.length > 0 ? (
+      <div class="space-y-6">
+        <TagCloud client:load />
+
+        <div>
+          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">All tags</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {tags.map(tag => (
+              <a
+                href={`/tags/${tag.slug}`}
+                class="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3 hover:border-gray-300 hover:bg-gray-50 no-underline transition-colors"
+              >
+                <span class="text-sm font-medium text-gray-900">#{tag.value}</span>
+                <span class="text-xs text-gray-500 bg-gray-100 rounded-full px-2 py-0.5">{tag.count}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    ) : (
+      <p class="text-gray-400 text-sm">No tags found. Add tags to your pages in their frontmatter.</p>
+    )}
+  </div>
+</Default>

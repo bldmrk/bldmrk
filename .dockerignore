@@ -1,0 +1,15 @@
+node_modules
+.git
+.github
+content
+backups
+dist
+**/*.test.ts
+**/*.integration.test.ts
+coverage
+.claude
+specs
+docs
+themes
+packages/admin
+packages/admin-hub

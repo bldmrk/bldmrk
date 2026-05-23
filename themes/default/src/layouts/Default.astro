@@ -1,0 +1,37 @@
+---
+import Navigation from '../components/Navigation.vue'
+import SearchBar from '../components/SearchBar.vue'
+import Footer from '../components/Footer.astro'
+import '../styles/global.css'
+
+interface Props {
+  title: string
+  description?: string
+}
+const { title, description } = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:type" content="website" />
+  </head>
+  <body class="min-h-screen bg-white" style="font-family: var(--font-family)">
+    <Navigation client:load />
+    <div class="border-b border-gray-100 bg-white">
+      <div class="max-w-5xl mx-auto px-6 py-2 flex justify-end">
+        <SearchBar client:load />
+      </div>
+    </div>
+    <main class="max-w-5xl mx-auto px-6 py-12">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

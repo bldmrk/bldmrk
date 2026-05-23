@@ -1,0 +1,29 @@
+import type { FastifyRequest, FastifyReply } from 'fastify'
+import type { AuthService } from '../../users/AuthService.js'
+import { TokenExpiredError, TokenTypeError } from '../../users/errors.js'
+
+export function buildAuthMiddleware(authService: AuthService) {
+  return async function authPreHandler(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
+    const authHeader = request.headers.authorization
+    if (!authHeader?.startsWith('Bearer ')) {
+      reply.code(401).send({ error: 'Unauthorized' })
+      return
+    }
+    const token = authHeader.slice(7)
+    try {
+      request.user = await authService.verifyToken(token)
+    } catch (err) {
+      if (err instanceof TokenExpiredError) {
+        reply.code(401).send({ error: 'Token expired' })
+      } else if (err instanceof TokenTypeError) {
+        reply.code(401).send({ error: 'Wrong token type' })
+      } else {
+        reply.code(401).send({ error: 'Unauthorized' })
+      }
+      return
+    }
+  }
+}

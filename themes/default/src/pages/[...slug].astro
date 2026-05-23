@@ -1,0 +1,99 @@
+---
+import { getCollection, render } from 'astro:content'
+import type { CollectionEntry } from 'astro:content'
+import Default from '../layouts/Default.astro'
+import Blog from '../layouts/Blog.astro'
+import BlogPost from '../layouts/BlogPost.astro'
+import Modular from '../layouts/Modular.astro'
+
+type PageEntry = CollectionEntry<'pages'>
+
+export async function getStaticPaths() {
+  function getCleanSlug(id: string): string {
+    return id
+      .replace(/\/index\.(md|mdx)$/, '')
+      .replace(/^index$/, '')
+      .split('/')
+      .map(seg => seg.replace(/^\d+--/, ''))
+      .filter(Boolean)
+      .join('/')
+  }
+  const allEntries = await getCollection('pages')
+  const published = allEntries.filter(e => e.data.published !== false)
+
+  return published.map(entry => {
+    const cleanSlug = getCleanSlug(entry.id)
+    const slugDepth = cleanSlug ? cleanSlug.split('/').length : 0
+
+    const children = published
+      .filter(e => {
+        const eSlug = getCleanSlug(e.id)
+        return (
+          eSlug !== cleanSlug &&
+          eSlug.startsWith(cleanSlug ? cleanSlug + '/' : '') &&
+          eSlug.split('/').length === slugDepth + 1
+        )
+      })
+      .map(e => ({ slug: getCleanSlug(e.id), data: e.data }))
+
+    const parentSlug = cleanSlug.split('/').slice(0, -1).join('/')
+    const siblings = published
+      .filter(e => {
+        const eSlug = getCleanSlug(e.id)
+        const eParts = eSlug.split('/')
+        const entryParts = cleanSlug.split('/')
+        return (
+          eParts.length === entryParts.length &&
+          eSlug.startsWith(parentSlug ? parentSlug + '/' : '')
+        )
+      })
+      .sort((a, b) => a.id.localeCompare(b.id))
+
+    const siblingIdx = siblings.findIndex(e => getCleanSlug(e.id) === cleanSlug)
+    const prevEntry = siblingIdx > 0 ? siblings[siblingIdx - 1] : undefined
+    const nextEntry = siblingIdx < siblings.length - 1 ? siblings[siblingIdx + 1] : undefined
+
+    return {
+      params: { slug: cleanSlug || undefined },
+      props: {
+        entry,
+        children,
+        prev: prevEntry ? { slug: getCleanSlug(prevEntry.id), title: prevEntry.data.title } : undefined,
+        next: nextEntry ? { slug: getCleanSlug(nextEntry.id), title: nextEntry.data.title } : undefined,
+      },
+    }
+  })
+}
+
+interface Props {
+  entry: PageEntry
+  children: Array<{ slug: string; data: { title: string; date?: Date; description?: string } }>
+  prev?: { slug: string; title: string }
+  next?: { slug: string; title: string }
+}
+
+const { entry, children, prev, next } = Astro.props
+const { Content } = await render(entry)
+const { title, description, template, date, author, tags } = entry.data
+---
+
+{template === 'blog' ? (
+  <Blog title={title} description={description}>
+    <Content />
+  </Blog>
+) : template === 'blog-post' ? (
+  <BlogPost title={title} description={description} date={date} author={author} tags={tags} prev={prev} next={next}>
+    <Content />
+  </BlogPost>
+) : template === 'modular' ? (
+  <Modular title={title} description={description}>
+    <Content />
+  </Modular>
+) : (
+  <Default title={title} description={description}>
+    <h1 class="text-4xl font-bold text-gray-900 mb-8">{title}</h1>
+    <div class="prose prose-gray max-w-none">
+      <Content />
+    </div>
+  </Default>
+)}

@@ -1,0 +1,121 @@
+---
+import Default from '../../layouts/Default.astro'
+import TagList from '../../components/TagList.vue'
+
+interface TaxonomyEntry {
+  value: string
+  count: number
+  slug: string
+}
+
+interface PageMeta {
+  slug: string
+  meta: {
+    title: string
+    description?: string
+    date?: string
+    author?: string
+    tags?: string[]
+    published: boolean
+    template: string
+  }
+}
+
+const API_URL = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:3000'
+
+export async function getStaticPaths() {
+  const apiUrl = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:3000'
+  let tags: TaxonomyEntry[] = []
+  try {
+    const res = await fetch(`${apiUrl}/api/taxonomy/tags`)
+    if (res.ok) {
+      tags = await res.json()
+    }
+  } catch {
+    // API unreachable at build time — generate no tag paths
+  }
+
+  return tags.map(tag => ({
+    params: { tag: tag.slug },
+    props: { tagEntry: tag },
+  }))
+}
+
+interface Props {
+  tagEntry: TaxonomyEntry
+}
+
+const { tagEntry } = Astro.props
+
+let pages: PageMeta[] = []
+try {
+  const res = await fetch(`${API_URL}/api/taxonomy/tags/${encodeURIComponent(tagEntry.value)}`)
+  if (res.ok) {
+    const body = await res.json()
+    pages = body.pages ?? []
+  }
+} catch {
+  // API unreachable — render empty list
+}
+
+function formatDate(dateStr?: string): string {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+function excerpt(page: PageMeta): string {
+  return page.meta.description ?? ''
+}
+---
+
+<Default
+  title={`#${tagEntry.value} — Tags`}
+  description={`All pages tagged with "${tagEntry.value}"`}
+>
+  <div class="space-y-8">
+    <div>
+      <nav class="text-sm text-gray-500 mb-4">
+        <a href="/tags" class="hover:text-gray-900 no-underline">Tags</a>
+        <span class="mx-2">/</span>
+        <span class="text-gray-900">#{tagEntry.value}</span>
+      </nav>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        #{tagEntry.value}
+      </h1>
+      <p class="text-gray-500">
+        {pages.length} page{pages.length !== 1 ? 's' : ''} tagged with this term
+      </p>
+    </div>
+
+    {pages.length > 0 ? (
+      <ul class="divide-y divide-gray-100">
+        {pages.map(page => (
+          <li class="py-6">
+            <article>
+              <a href={`/${page.slug}`} class="no-underline group">
+                <h2 class="text-xl font-semibold text-gray-900 group-hover:text-[var(--color-primary)] mb-1">
+                  {page.meta.title}
+                </h2>
+              </a>
+              {(page.meta.date || page.meta.author) && (
+                <div class="flex gap-3 text-sm text-gray-500 mb-2">
+                  {page.meta.date && <time datetime={page.meta.date}>{formatDate(page.meta.date)}</time>}
+                  {page.meta.author && <span>by {page.meta.author}</span>}
+                </div>
+              )}
+              {excerpt(page) && (
+                <p class="text-gray-600 text-sm mb-3 line-clamp-2">{excerpt(page)}</p>
+              )}
+              {page.meta.tags && page.meta.tags.length > 0 && (
+                <TagList tags={page.meta.tags} client:load />
+              )}
+            </article>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="text-gray-400 text-sm">No pages found for this tag.</p>
+    )}
+  </div>
+</Default>

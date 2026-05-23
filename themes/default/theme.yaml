@@ -1,0 +1,6 @@
+name: "bldmrk Default"
+version: "1.0.0"
+templates: [default, blog, blog-post, modular]
+options:
+  - { key: primary_color, type: color, default: "#3b82f6" }
+  - { key: font_family, type: select, options: [Inter, Geist, System], default: Inter }

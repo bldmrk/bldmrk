@@ -1,0 +1,57 @@
+name: default
+label: Default Page
+
+tabs:
+  - id: content
+    label: Content
+    fields:
+      - name: _content
+        type: markdown
+        label: Page Content
+
+  - id: meta
+    label: Metadata
+    fields:
+      - name: title
+        type: text
+        label: Title
+        required: true
+      - name: slug
+        type: slug
+        label: URL Slug
+        source: title
+      - name: template
+        type: template
+        label: Template
+        default: default
+      - name: published
+        type: boolean
+        label: Published
+        default: true
+      - name: date
+        type: datetime
+        label: Date
+      - name: author
+        type: text
+        label: Author
+      - name: description
+        type: textarea
+        label: Description
+        placeholder: Short page description
+      - name: tags
+        type: tags
+        label: Tags
+
+  - id: seo
+    label: SEO
+    fields:
+      - name: meta.title
+        type: text
+        label: SEO Title
+        placeholder: Defaults to page title if empty
+      - name: meta.description
+        type: textarea
+        label: Meta Description
+      - name: meta.image
+        type: image
+        label: Social Image

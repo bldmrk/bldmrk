@@ -1,0 +1,23 @@
+{
+  "name": "bldmrk-plugin-seo",
+  "version": "1.0.0",
+  "description": "SEO meta tag injection for bldmrk",
+  "type": "module",
+  "keywords": ["bldmrk-plugin"],
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@bldmrk/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@bldmrk/core": "workspace:*",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

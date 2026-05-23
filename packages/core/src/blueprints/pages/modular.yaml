@@ -1,0 +1,31 @@
+name: modular
+label: Modular Page
+extends: default
+
+tabs:
+  - id: content
+    label: Content
+    fields:
+      - name: _content
+        type: markdown
+        label: Content
+
+  - id: meta
+    label: Metadata
+    fields:
+      - name: title
+        type: text
+        label: Title
+        required: true
+      - name: slug
+        type: slug
+        label: URL Slug
+        source: title
+      - name: template
+        type: template
+        label: Template
+        default: modular
+      - name: published
+        type: boolean
+        label: Published
+        default: true

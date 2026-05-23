@@ -1,0 +1,46 @@
+name: system
+label: System Settings
+
+tabs:
+  - id: server
+    label: Server
+    fields:
+      - name: port
+        type: number
+        label: Port
+        default: 3000
+        help: Port the API server listens on
+      - name: adminPath
+        type: text
+        label: Admin Path
+        default: /admin
+      - name: logLevel
+        type: select
+        label: Log Level
+        default: info
+        options:
+          - value: error
+            label: Error
+          - value: warn
+            label: Warning
+          - value: info
+            label: Info
+          - value: debug
+            label: Debug
+
+  - id: git
+    label: Git
+    fields:
+      - name: git.autoCommit
+        type: toggle
+        label: Auto-Commit on Save
+        default: false
+        help: Automatically create a git commit after each page save
+
+  - id: cors
+    label: CORS
+    fields:
+      - name: cors.origins
+        type: tags
+        label: Allowed Origins
+        help: List of allowed CORS origins (e.g. https://example.com)

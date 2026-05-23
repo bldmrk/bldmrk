@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.turbo/
+coverage/
+*.tsbuildinfo
+.env
+.env.local
+.claude/
+repomix-output.md
+
+# Internal planning/spec docs (kept locally, not for public repo)
+FOLIO_PLAN.md
+specs/
+docs/superpowers/
