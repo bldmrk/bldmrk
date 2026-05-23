@@ -139,7 +139,7 @@ onBeforeRouteLeave(() => {
         </button>
       </div>
       <div class="flex items-center gap-2">
-        <button data-testid="delete-page" class="px-3 py-1.5 text-sm border border-red-200 text-red-600 rounded hover:bg-red-50" data-testid="delete-page" @click="deletePage">Delete</button>
+        <button data-testid="delete-page" class="px-3 py-1.5 text-sm border border-red-200 text-red-600 rounded hover:bg-red-50" @click="deletePage">Delete</button>
         <button class="px-3 py-1.5 text-sm border border-gray-200 rounded hover:bg-gray-50" @click="splitView = !splitView">
           {{ splitView ? 'Editor only' : 'Split view' }}
         </button>
