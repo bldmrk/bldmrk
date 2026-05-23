@@ -17,7 +17,10 @@ export default defineConfig({
     command: 'node packages/cli/dist/index.js dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
-    env: { BLDMRK_PROJECT_DIR: tmpDir },
+    env: {
+      BLDMRK_PROJECT_DIR: tmpDir,
+      BLDMRK_JWT_SECRET: 'e2e-test-secret-for-ci-32chars!!',
+    },
     timeout: 60_000,
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
