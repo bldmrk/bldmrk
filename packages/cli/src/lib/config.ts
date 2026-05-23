@@ -18,5 +18,6 @@ export async function loadAppConfig(cwd = process.env['BLDMRK_PROJECT_DIR'] ?? p
     port: system.port,
     jwtSecret,
     corsOrigins: system.cors.origins,
+    projectDir: cwd,
   }
 }
