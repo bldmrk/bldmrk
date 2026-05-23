@@ -1,6 +1,5 @@
 import { test, expect } from './helpers/fixtures.js'
 
-test.use({ authedPage: undefined })
 
 test('pages list shows fixture pages', async ({ page, authedPage: _ }) => {
   await page.goto('/pages')

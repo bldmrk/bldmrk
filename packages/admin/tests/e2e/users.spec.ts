@@ -1,6 +1,5 @@
 import { test, expect } from './helpers/fixtures.js'
 
-test.use({ authedPage: undefined })
 
 test('users page loads and shows current admin', async ({ page, authedPage: _ }) => {
   await page.goto('/users')

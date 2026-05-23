@@ -1,6 +1,5 @@
 import { test, expect } from './helpers/fixtures.js'
 
-test.use({ authedPage: undefined })
 
 test('trigger build shows building status', async ({ page, authedPage: _ }) => {
   await page.goto('/')

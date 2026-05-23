@@ -1,6 +1,5 @@
 import { test, expect } from './helpers/fixtures.js'
 
-test.use({ authedPage: undefined })
 
 test('history tab is visible on page edit', async ({ page, authedPage: _ }) => {
   await page.goto('/pages/home')

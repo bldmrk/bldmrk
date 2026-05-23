@@ -3,7 +3,6 @@ import path from 'path'
 import { writeFile, mkdir } from 'fs/promises'
 import os from 'os'
 
-test.use({ authedPage: undefined })
 
 test('media grid loads', async ({ page, authedPage: _ }) => {
   await page.goto('/media')
