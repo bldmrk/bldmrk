@@ -70,9 +70,11 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Build CLI
+        run: pnpm --filter @bldmrk/cli build
+
       - name: Build admin and theme
         run: pnpm build:admin && pnpm build:theme
-        continue-on-error: true
 
       - name: Run E2E tests
         run: pnpm test:e2e

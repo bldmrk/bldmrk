@@ -3,8 +3,8 @@ import path from 'path'
 import { UserStore } from '@bldmrk/core'
 
 export default async function globalSetup() {
-  const tmpDir = process.env.FOLIO_E2E_TMP_DIR
-  if (!tmpDir) throw new Error('FOLIO_E2E_TMP_DIR not set')
+  const tmpDir = process.env.BLDMRK_E2E_TMP_DIR
+  if (!tmpDir) throw new Error('BLDMRK_E2E_TMP_DIR not set')
 
   const contentDir = path.join(tmpDir, 'content')
   const configDir = path.join(contentDir, 'config')
