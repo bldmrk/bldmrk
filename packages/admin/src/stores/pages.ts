@@ -15,8 +15,8 @@ export interface PageMeta {
 
 export interface PageObject {
   slug: string
-  content: string
-  data: PageMeta
+  rawContent: string
+  meta: PageMeta
 }
 
 export const usePagesStore = defineStore('pages', () => {
@@ -33,8 +33,8 @@ export const usePagesStore = defineStore('pages', () => {
   async function savePage(): Promise<void> {
     if (!currentPage.value) return
     await api.put(`/api/pages/${currentPage.value.slug}`, {
-      content: currentPage.value.content,
-      data: currentPage.value.data,
+      content: currentPage.value.rawContent,
+      ...currentPage.value.meta,
     })
     isDirty.value = false
   }

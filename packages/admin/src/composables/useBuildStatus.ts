@@ -1,5 +1,6 @@
 import { ref, onUnmounted } from 'vue'
 import { useApi } from './useApi.js'
+import { useAuthStore } from '@/stores/auth.js'
 
 export type BuildStatus = 'idle' | 'queued' | 'building' | 'done' | 'error'
 
@@ -9,9 +10,9 @@ export function useBuildStatus() {
   const duration = ref<number | undefined>(undefined)
   const api = useApi()
 
-  const es = new EventSource('/api/build/status', {
-    // Note: EventSource doesn't support custom headers — auth handled server-side or via cookie
-  })
+  const auth = useAuthStore()
+  const sseUrl = auth.token ? `/api/build/status?token=${encodeURIComponent(auth.token)}` : '/api/build/status'
+  const es = new EventSource(sseUrl)
 
   es.onmessage = (event: MessageEvent) => {
     try {

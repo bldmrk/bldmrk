@@ -4,6 +4,11 @@ import { hash as argon2Hash, verify as argon2Verify } from 'argon2'
 import { randomUUID } from 'crypto'
 import type { User, NewUser } from './types.js'
 
+// In test environments use minimal cost to keep login fast
+const ARGON2_OPTIONS = process.env['BLDMRK_FAST_HASH'] === '1'
+  ? { memoryCost: 4096, timeCost: 1, parallelism: 1 }
+  : {}
+
 export class UserStore {
   constructor(private readonly filePath: string) {}
 
@@ -33,7 +38,7 @@ export class UserStore {
     const user: User = {
       id: randomUUID(),
       email: newUser.email,
-      passwordHash: await argon2Hash(newUser.password),
+      passwordHash: await argon2Hash(newUser.password, ARGON2_OPTIONS),
       role: newUser.role,
       createdAt: new Date().toISOString(),
     }
@@ -51,7 +56,7 @@ export class UserStore {
     if (index === -1) throw new Error(`User not found: ${id}`)
     if (data.password) {
       const { password: _pw, ...safeData } = data
-      users[index] = { ...users[index]!, ...safeData, passwordHash: await argon2Hash(data.password) }
+      users[index] = { ...users[index]!, ...safeData, passwordHash: await argon2Hash(data.password, ARGON2_OPTIONS) }
     } else {
       const { password: _pw, ...safeData } = data
       users[index] = { ...users[index]!, ...safeData }

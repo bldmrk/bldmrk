@@ -7,7 +7,7 @@ import PageTree from '@/components/PageTree.vue'
 
 interface Page {
   slug: string
-  data: { title: string; template?: string; published?: boolean; date?: string }
+  meta: { title: string; template?: string; published?: boolean; date?: string }
 }
 
 const api = useApi()
@@ -28,11 +28,12 @@ const sorted = computed(() =>
 )
 
 async function createPage() {
-  await api.post('/api/pages', { slug: newSlug.value, title: newTitle.value, template: newTemplate.value })
+  const slug = newSlug.value
+  await api.post('/api/pages', { slug, title: newTitle.value, template: newTemplate.value })
   showModal.value = false
   newTitle.value = ''
   newSlug.value = ''
-  await refetch()
+  router.push(`/pages/${slug}`)
 }
 
 function onTitleInput() {
@@ -79,14 +80,14 @@ function onTitleInput() {
           @click="router.push(`/pages/${page.slug}`)"
         >
           <td class="py-2 text-gray-500 font-mono text-xs">{{ page.slug }}</td>
-          <td class="py-2 text-gray-900">{{ page.data.title }}</td>
-          <td class="py-2 text-gray-500">{{ page.data.template ?? '—' }}</td>
+          <td class="py-2 text-gray-900">{{ page.meta.title }}</td>
+          <td class="py-2 text-gray-500">{{ page.meta.template ?? '—' }}</td>
           <td class="py-2">
-            <span :class="page.data.published ? 'text-green-600' : 'text-gray-400'">
-              {{ page.data.published ? '✓' : '—' }}
+            <span :class="page.meta.published ? 'text-green-600' : 'text-gray-400'">
+              {{ page.meta.published ? '✓' : '—' }}
             </span>
           </td>
-          <td class="py-2 text-gray-400 text-xs">{{ page.data.date ?? '—' }}</td>
+          <td class="py-2 text-gray-400 text-xs">{{ page.meta.date ?? '—' }}</td>
         </tr>
       </tbody>
     </table>

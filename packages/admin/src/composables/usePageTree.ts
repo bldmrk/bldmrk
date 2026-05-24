@@ -3,7 +3,7 @@ import { useApi } from './useApi.js'
 
 export interface PageObject {
   slug: string
-  data: { title: string; template?: string; published?: boolean; date?: string }
+  meta: { title: string; template?: string; published?: boolean; date?: string }
   children?: PageObject[]
 }
 

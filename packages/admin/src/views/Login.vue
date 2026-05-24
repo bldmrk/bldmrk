@@ -24,8 +24,8 @@ async function submit() {
     <form class="w-full max-w-sm space-y-4 bg-white p-8 rounded-lg shadow" @submit.prevent="submit">
       <h1 class="text-2xl font-bold text-gray-900">bldmrk Admin</h1>
       <p v-if="error" data-testid="login-error" class="text-sm text-red-600">{{ error }}</p>
-      <input v-model="email" type="email" placeholder="Email" required class="w-full border rounded px-3 py-2 text-sm" />
-      <input v-model="password" type="password" placeholder="Password" required class="w-full border rounded px-3 py-2 text-sm" />
+      <input v-model="email" name="email" type="email" placeholder="Email" required class="w-full border rounded px-3 py-2 text-sm" />
+      <input v-model="password" name="password" type="password" placeholder="Password" required class="w-full border rounded px-3 py-2 text-sm" />
       <button type="submit" class="w-full bg-gray-900 text-white rounded px-3 py-2 text-sm font-medium">Sign in</button>
     </form>
   </div>

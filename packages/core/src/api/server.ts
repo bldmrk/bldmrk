@@ -117,7 +117,8 @@ export async function createApp(config: AppConfig): Promise<FastifyInstance> {
     crossOriginEmbedderPolicy: false,
   })
   await app.register(multipart)
-  await app.register(rateLimit, { max: 100, timeWindow: '1 minute', global: true })
+  const rateLimitMax = process.env['BLDMRK_FAST_HASH'] === '1' ? 100_000 : 100
+  await app.register(rateLimit, { max: rateLimitMax, timeWindow: '1 minute', global: true })
 
   // Load system config once; reuse for both cache setup and backup
   const configLoader = new ConfigLoader()
