@@ -14,7 +14,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     return fetch(path, {
       method,
       headers: {
-        'Content-Type': 'application/json',
+        ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),

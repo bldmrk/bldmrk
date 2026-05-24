@@ -8,11 +8,12 @@ export function buildAuthMiddleware(authService: AuthService) {
     reply: FastifyReply,
   ): Promise<void> {
     const authHeader = request.headers.authorization
-    if (!authHeader?.startsWith('Bearer ')) {
+    const queryToken = (request.query as Record<string, string>).token
+    if (!authHeader?.startsWith('Bearer ') && !queryToken) {
       reply.code(401).send({ error: 'Unauthorized' })
       return
     }
-    const token = authHeader.slice(7)
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : queryToken!
     try {
       request.user = await authService.verifyToken(token)
     } catch (err) {

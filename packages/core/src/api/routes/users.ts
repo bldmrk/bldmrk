@@ -34,11 +34,14 @@ export async function registerUserRoutes(
     return { store: userStore, auth: authService }
   }
 
-  // POST /api/auth/login — rate-limited to 5/min per IP
+  // POST /api/auth/login — rate-limited to 5/min per IP (disabled in test env)
+  const loginRateLimit = process.env['BLDMRK_FAST_HASH'] === '1'
+    ? {}
+    : { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } }
   app.post<{ Body: { email: string; password: string } }>(
     '/api/auth/login',
     {
-      config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
+      ...loginRateLimit,
       schema: {
         body: {
           type: 'object',

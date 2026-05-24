@@ -16,6 +16,7 @@ interface RouteOptions {
 interface MediaObject {
   id: string
   filename: string
+  originalFilename: string
   url: string
   webpUrl: string
   width: number
@@ -109,6 +110,7 @@ export async function registerMediaRoutes(
     const mediaObj: MediaObject = {
       id,
       filename: basename,
+      originalFilename: filename,
       url: `${urlBase}/${basename}`,
       webpUrl: `${urlBase}/${webpBasename}`,
       width: processed.width,

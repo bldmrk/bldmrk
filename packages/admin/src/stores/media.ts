@@ -5,6 +5,7 @@ import { useApi } from '@/composables/useApi.js'
 export interface MediaObject {
   id: string
   filename: string
+  originalFilename?: string
   url: string
   webpUrl?: string
   size?: number

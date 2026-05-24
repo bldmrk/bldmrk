@@ -22,14 +22,14 @@ const splitView = ref(true)
 const refreshKey = ref(0)
 const activeTab = ref<'content' | 'meta' | 'media' | 'history'>('content')
 
-const currentTemplate = computed(() => (pages.currentPage?.data.template as string | undefined) ?? 'default')
+const currentTemplate = computed(() => (pages.currentPage?.meta.template as string | undefined) ?? 'default')
 const { data: blueprint } = useBlueprintForPage(currentTemplate)
 
 const metaFormData = computed<Record<string, unknown>>({
-  get: () => ({ ...(pages.currentPage?.data ?? {}) }),
+  get: () => ({ ...(pages.currentPage?.meta ?? {}) }),
   set: (val) => {
     if (!pages.currentPage) return
-    Object.assign(pages.currentPage.data, val)
+    Object.assign(pages.currentPage.meta, val)
     pages.markDirty()
   },
 })
@@ -53,7 +53,7 @@ async function createTranslation(locale: string) {
   try {
     await api.post('/api/pages', {
       slug: newSlug,
-      title: `${pages.currentPage?.data.title ?? slug.value} (${locale})`,
+      title: `${pages.currentPage?.meta.title ?? slug.value} (${locale})`,
       i18n: { locale, variants: { [locale]: newSlug } },
     })
     await loadVariants(slug.value)
@@ -79,7 +79,7 @@ watch(slug, (s) => {
 
 function onContentChange(val: string) {
   if (!pages.currentPage) return
-  pages.currentPage.content = val
+  pages.currentPage.rawContent = val
   pages.markDirty()
   if (autoSaveTimer) clearTimeout(autoSaveTimer)
   autoSaveTimer = setTimeout(() => pages.savePage(), 30_000)
@@ -91,9 +91,12 @@ async function save() {
 }
 
 async function deletePage() {
-  if (!confirm(`Delete "${pages.currentPage?.data.title}"?`)) return
-  await pages.deletePage(slug.value)
-  router.push('/pages')
+  if (!confirm(`Delete "${pages.currentPage?.meta.title}"?`)) return
+  try {
+    await pages.deletePage(slug.value)
+  } finally {
+    router.push('/pages')
+  }
 }
 
 onUnmounted(() => { if (autoSaveTimer) clearTimeout(autoSaveTimer) })
@@ -112,7 +115,7 @@ onBeforeRouteLeave(() => {
       <div class="flex items-center gap-3 flex-wrap">
         <button class="text-sm text-gray-500 hover:text-gray-900" @click="router.push('/pages')">← Pages</button>
         <span class="text-gray-300">/</span>
-        <span class="text-sm font-medium text-gray-900">{{ pages.currentPage?.data.title ?? slug }}</span>
+        <span class="text-sm font-medium text-gray-900">{{ pages.currentPage?.meta.title ?? slug }}</span>
         <span v-if="pages.isDirty" class="text-xs text-amber-500">Unsaved</span>
 
         <!-- i18n language tabs -->
@@ -166,7 +169,7 @@ onBeforeRouteLeave(() => {
 
         <!-- Content editor -->
         <div v-if="activeTab === 'content'" class="flex-1 overflow-hidden p-2">
-          <MdxEditor :model-value="pages.currentPage.content" class="h-full" @update:model-value="onContentChange" />
+          <MdxEditor :model-value="pages.currentPage.rawContent" class="h-full" @update:model-value="onContentChange" />
         </div>
 
         <!-- Metadata panel — blueprint-driven -->
