@@ -95,8 +95,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -139,11 +137,18 @@ jobs:
       - name: Build create
         run: pnpm --filter @bldmrk/create build
 
+      - name: Pack packages
+        run: |
+          mkdir -p /tmp/tarballs
+          pnpm --filter @bldmrk/core pack --pack-destination /tmp/tarballs
+          pnpm --filter @bldmrk/cli pack --pack-destination /tmp/tarballs
+          pnpm --filter @bldmrk/create pack --pack-destination /tmp/tarballs
+
       - name: Publish packages
         run: |
-          pnpm --filter @bldmrk/core publish --no-git-checks --access public --provenance
-          pnpm --filter @bldmrk/cli publish --no-git-checks --access public --provenance
-          pnpm --filter @bldmrk/create publish --no-git-checks --access public --provenance
+          npm publish /tmp/tarballs/bldmrk-core-*.tgz --provenance --access public
+          npm publish /tmp/tarballs/bldmrk-cli-*.tgz --provenance --access public
+          npm publish /tmp/tarballs/bldmrk-create-*.tgz --provenance --access public
 
   release:
     name: GitHub Release
