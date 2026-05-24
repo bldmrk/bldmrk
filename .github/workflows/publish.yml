@@ -140,9 +140,9 @@ jobs:
       - name: Pack packages
         run: |
           mkdir -p /tmp/tarballs
-          pnpm --filter @bldmrk/core pack --pack-destination /tmp/tarballs
-          pnpm --filter @bldmrk/cli pack --pack-destination /tmp/tarballs
-          pnpm --filter @bldmrk/create pack --pack-destination /tmp/tarballs
+          (cd packages/core && pnpm pack --pack-destination /tmp/tarballs)
+          (cd packages/cli && pnpm pack --pack-destination /tmp/tarballs)
+          (cd packages/create && pnpm pack --pack-destination /tmp/tarballs)
 
       - name: Publish packages
         run: |
