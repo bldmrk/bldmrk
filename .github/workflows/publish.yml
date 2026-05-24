@@ -123,9 +123,9 @@ jobs:
 
       - name: Set package versions
         run: |
-          (cd packages/core && npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version)
-          (cd packages/cli && npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version)
-          (cd packages/create && npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version)
+          (cd packages/core && npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version --allow-same-version)
+          (cd packages/cli && npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version --allow-same-version)
+          (cd packages/create && npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version --allow-same-version)
 
       - name: Build core
         run: pnpm --filter @bldmrk/core build
