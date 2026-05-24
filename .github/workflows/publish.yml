@@ -3,7 +3,7 @@ name: Publish
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - '[0-9]*.[0-9]*.[0-9]*'
 
 permissions:
   contents: read
@@ -112,7 +112,7 @@ jobs:
 
       - name: Extract version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
       - name: Validate version format
         run: |
@@ -157,7 +157,7 @@ jobs:
         id: changelog
         run: |
           CURRENT_TAG="${GITHUB_REF_NAME}"
-          PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]' | sed -n '2p')
+          PREV_TAG=$(git tag --sort=-version:refname | grep -E '^[0-9]' | sed -n '2p')
 
           if [ -z "$PREV_TAG" ]; then
             COMMITS=$(git log "${CURRENT_TAG}" --pretty=format:"- %s (%h)")
