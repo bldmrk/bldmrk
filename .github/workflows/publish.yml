@@ -1,0 +1,206 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run unit tests with coverage
+        run: pnpm test:unit --coverage
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run integration tests
+        run: pnpm test:integration
+
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build core
+        run: pnpm --filter @bldmrk/core build
+
+      - name: Build CLI
+        run: pnpm --filter @bldmrk/cli build
+
+      - name: Build admin and theme
+        run: pnpm build:admin && pnpm build:theme
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+
+  build-and-publish:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+    needs: [unit, integration, e2e]
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Validate version format
+        run: |
+          echo "${{ steps.version.outputs.VERSION }}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || {
+            echo "Invalid version: ${{ steps.version.outputs.VERSION }}"
+            exit 1
+          }
+
+      - name: Set package versions
+        run: |
+          (cd packages/core && npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version)
+          (cd packages/cli && npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version)
+          (cd packages/create && npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version)
+
+      - name: Build core
+        run: pnpm --filter @bldmrk/core build
+
+      - name: Build CLI
+        run: pnpm --filter @bldmrk/cli build
+
+      - name: Build create
+        run: pnpm --filter @bldmrk/create build
+
+      - name: Publish packages
+        run: |
+          pnpm --filter @bldmrk/core publish --no-git-checks --access public
+          pnpm --filter @bldmrk/cli publish --no-git-checks --access public
+          pnpm --filter @bldmrk/create publish --no-git-checks --access public
+
+  release:
+    name: GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-and-publish]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          CURRENT_TAG="${GITHUB_REF_NAME}"
+          PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]' | sed -n '2p')
+
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log "${CURRENT_TAG}" --pretty=format:"- %s (%h)")
+          else
+            COMMITS=$(git log "${PREV_TAG}..${CURRENT_TAG}" --pretty=format:"- %s (%h)")
+          fi
+
+          FEATURES=$(echo "$COMMITS" | grep -E '^- feat(\(.+\))?:' || true)
+          FIXES=$(echo "$COMMITS" | grep -E '^- fix(\(.+\))?:' || true)
+          REFACTORS=$(echo "$COMMITS" | grep -E '^- refactor(\(.+\))?:' || true)
+          DOCS=$(echo "$COMMITS" | grep -E '^- docs(\(.+\))?:' || true)
+          CHORES=$(echo "$COMMITS" | grep -E '^- (chore|test|ci)(\(.+\))?:' || true)
+          OTHERS=$(echo "$COMMITS" | grep -E '^- ' | grep -Ev '^- (feat|fix|refactor|docs|chore|test|ci)(\(.+\))?:' || true)
+
+          CHANGELOG=""
+          [ -n "$FEATURES" ] && CHANGELOG="${CHANGELOG}### Features\n${FEATURES}\n\n"
+          [ -n "$FIXES" ] && CHANGELOG="${CHANGELOG}### Fehlerbehebungen\n${FIXES}\n\n"
+          [ -n "$REFACTORS" ] && CHANGELOG="${CHANGELOG}### Refactoring\n${REFACTORS}\n\n"
+          [ -n "$DOCS" ] && CHANGELOG="${CHANGELOG}### Dokumentation\n${DOCS}\n\n"
+          [ -n "$CHORES" ] && CHANGELOG="${CHANGELOG}### Wartung\n${CHORES}\n\n"
+          [ -n "$OTHERS" ] && CHANGELOG="${CHANGELOG}### Sonstiges\n${OTHERS}\n\n"
+
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="Keine Änderungen dokumentiert."
+          fi
+
+          if [ -n "$PREV_TAG" ]; then
+            CHANGELOG="${CHANGELOG}**Vollständiges Changelog:** \`${PREV_TAG}...${CURRENT_TAG}\`"
+          fi
+
+          # Mehrzeiligen Output sicher in GITHUB_OUTPUT schreiben
+          {
+            echo "NOTES<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        run: |
+          printf '%b' "$NOTES" > /tmp/release-notes.md
+          gh release create "${{ github.ref_name }}" \
+            --title "bldmrk ${{ github.ref_name }}" \
+            --notes-file /tmp/release-notes.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTES: ${{ steps.changelog.outputs.NOTES }}
