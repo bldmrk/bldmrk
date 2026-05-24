@@ -17,9 +17,10 @@ const statusColors: Record<string, string> = {
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span class="text-sm font-medium text-gray-700">Build</span>
-        <span :class="['px-2 py-0.5 rounded text-xs font-medium', statusColors[status] ?? statusColors.idle]">
-          {{ status }}
-        </span>
+        <span
+          data-testid="build-status-badge"
+          :class="['px-2 py-0.5 rounded text-xs font-medium', statusColors[status] ?? statusColors.idle]"
+        >{{ status }}</span>
         <span v-if="duration" class="text-xs text-gray-400">{{ (duration / 1000).toFixed(1) }}s</span>
       </div>
       <button

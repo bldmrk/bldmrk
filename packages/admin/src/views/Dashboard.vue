@@ -8,7 +8,7 @@ import DeployPanel from '@/components/DeployPanel.vue'
 import GitHistory from '@/components/GitHistory.vue'
 import BackupPanel from '@/components/BackupPanel.vue'
 
-interface PageMeta { slug: string; data: { title: string; date?: string } }
+interface PageMeta { slug: string; meta: { title: string; date?: string | Date } }
 interface BuildResult { success: boolean; duration: number; pages: number }
 
 const api = useApi()
@@ -29,7 +29,7 @@ const router = useRouter()
 
 const recentPages = () =>
   [...(pages.value ?? [])]
-    .sort((a, b) => (b.data.date ?? '').localeCompare(a.data.date ?? ''))
+    .sort((a, b) => String(b.meta.date ?? '').localeCompare(String(a.meta.date ?? '')))
     .slice(0, 5)
 
 const lastBuild = () => buildHistory.value?.[0]
@@ -73,7 +73,7 @@ function logout() {
       <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Recent pages</h2>
       <ul class="divide-y divide-gray-100">
         <li v-for="page in recentPages()" :key="page.slug" class="py-2 flex justify-between items-center">
-          <span class="text-sm text-gray-900">{{ page.data.title }}</span>
+          <span class="text-sm text-gray-900">{{ page.meta.title }}</span>
           <span class="text-xs text-gray-400">{{ page.slug }}</span>
         </li>
       </ul>

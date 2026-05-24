@@ -49,6 +49,7 @@ const arrVal = computed(() => (Array.isArray(props.modelValue) ? props.modelValu
       <input
         v-if="field.type === 'text' || field.type === 'hidden'"
         :id="`bp-${field.name}`"
+        :name="field.name"
         :value="strVal"
         :type="field.type === 'hidden' ? 'hidden' : 'text'"
         :placeholder="field.placeholder"

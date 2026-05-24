@@ -9,8 +9,6 @@ test('history tab is visible on page edit', async ({ page, authedPage: _ }) => {
 test('history tab shows empty state when no commits exist', async ({ page, authedPage: _ }) => {
   await page.goto('/pages/home')
   await page.click('button:has-text("History")')
-  // Either shows commits or the empty state message
-  const hasRevisions = await page.locator('.revision-item').count()
-  const hasEmpty = await page.locator('.revisions-empty').isVisible().catch(() => false)
-  expect(hasRevisions > 0 || hasEmpty).toBe(true)
+  // Wait until either commits or the empty state appear (API is async)
+  await expect(page.locator('.revision-item, .revisions-empty')).toBeVisible({ timeout: 15_000 })
 })

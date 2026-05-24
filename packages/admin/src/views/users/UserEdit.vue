@@ -40,17 +40,17 @@ async function submit() {
     <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
 
     <label class="block"><span class="text-xs font-medium text-gray-500 uppercase">Email</span>
-      <input v-model="email" type="email" required :disabled="!!user" class="mt-1 w-full border rounded px-3 py-2 text-sm disabled:bg-gray-50" /></label>
+      <input v-model="email" type="email" name="email" required :disabled="!!user" class="mt-1 w-full border rounded px-3 py-2 text-sm disabled:bg-gray-50" /></label>
 
     <label class="block"><span class="text-xs font-medium text-gray-500 uppercase">Role</span>
-      <select v-model="role" class="mt-1 w-full border rounded px-3 py-2 text-sm">
+      <select v-model="role" name="role" class="mt-1 w-full border rounded px-3 py-2 text-sm">
         <option value="admin">Admin</option>
         <option value="editor">Editor</option>
         <option value="viewer">Viewer</option>
       </select></label>
 
     <label class="block"><span class="text-xs font-medium text-gray-500 uppercase">Password{{ user ? ' (leave blank to keep)' : '' }}</span>
-      <input v-model="password" type="password" :required="!user" class="mt-1 w-full border rounded px-3 py-2 text-sm" /></label>
+      <input v-model="password" type="password" name="password" :required="!user" class="mt-1 w-full border rounded px-3 py-2 text-sm" /></label>
 
     <div class="flex gap-2 justify-end pt-2">
       <button type="button" class="px-4 py-2 text-sm border rounded hover:bg-gray-50" @click="emit('cancel')">Cancel</button>

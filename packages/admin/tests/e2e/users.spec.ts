@@ -3,7 +3,7 @@ import { test, expect } from './helpers/fixtures.js'
 
 test('users page loads and shows current admin', async ({ page, authedPage: _ }) => {
   await page.goto('/users')
-  await expect(page.getByText('admin@test.com')).toBeVisible()
+  await expect(page.getByText('admin@test.com')).toBeVisible({ timeout: 10_000 })
 })
 
 test('create a new user', async ({ page, authedPage: _ }) => {

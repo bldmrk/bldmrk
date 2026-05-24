@@ -99,7 +99,7 @@ function isImage(item: MediaObject) {
           <img v-if="isImage(item)" :src="item.webpUrl ?? item.url" :alt="item.filename" class="w-full h-full object-cover" />
           <div v-else class="flex items-center justify-center h-full text-3xl text-gray-300">📄</div>
           <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
-            <span class="text-white text-xs text-center px-2 truncate w-full text-center">{{ item.filename }}</span>
+            <span class="text-white text-xs text-center px-2 truncate w-full text-center">{{ item.originalFilename ?? item.filename }}</span>
             <span class="text-white/70 text-xs">{{ formatSize(item.size) }}</span>
           </div>
         </div>
@@ -122,7 +122,7 @@ function isImage(item: MediaObject) {
             class="hover:bg-gray-50 cursor-pointer"
             @contextmenu="onContextMenu($event, item)"
           >
-            <td class="px-4 py-2 text-gray-900">{{ item.filename }}</td>
+            <td class="px-4 py-2 text-gray-900">{{ item.originalFilename ?? item.filename }}</td>
             <td class="px-4 py-2 text-gray-500">{{ item.mimeType ?? '—' }}</td>
             <td class="px-4 py-2 text-gray-500">{{ formatSize(item.size) }}</td>
             <td class="px-4 py-2 text-gray-400 text-xs">{{ item.createdAt?.slice(0, 10) ?? '—' }}</td>

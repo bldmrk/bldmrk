@@ -33,11 +33,18 @@ export const MediaProcessor = {
 
   async processUpload(input: Buffer, _filename: string): Promise<ProcessedMedia> {
     const meta = await sharp(input).metadata()
-    const [webp, avif, thumbnail] = await Promise.all([
-      MediaProcessor.toWebP(input),
-      MediaProcessor.toAVIF(input),
-      MediaProcessor.thumbnail(input, 200),
-    ])
+    let webp = input
+    let avif = input
+    let thumbnail = input
+    try {
+      ;[webp, avif, thumbnail] = await Promise.all([
+        MediaProcessor.toWebP(input),
+        MediaProcessor.toAVIF(input),
+        MediaProcessor.thumbnail(input, 200),
+      ])
+    } catch {
+      // Fallback to original if image conversion fails (e.g. SVG, unsupported format)
+    }
     return {
       original: input,
       webp,
