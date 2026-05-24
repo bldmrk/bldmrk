@@ -5,5 +5,8 @@
   "scripts": {
     "dev": "bldmrk dev",
     "build": "bldmrk build"
+  },
+  "dependencies": {
+    "@bldmrk/cli": "latest"
   }
 }
