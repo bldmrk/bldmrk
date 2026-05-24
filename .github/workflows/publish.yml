@@ -174,10 +174,10 @@ jobs:
 
           CHANGELOG=""
           [ -n "$FEATURES" ] && CHANGELOG="${CHANGELOG}### Features\n${FEATURES}\n\n"
-          [ -n "$FIXES" ] && CHANGELOG="${CHANGELOG}### Bug Fixes\n${FIXES}\n\n"
+          [ -n "$FIXES" ] && CHANGELOG="${CHANGELOG}### Fehlerbehebungen\n${FIXES}\n\n"
           [ -n "$REFACTORS" ] && CHANGELOG="${CHANGELOG}### Refactoring\n${REFACTORS}\n\n"
           [ -n "$DOCS" ] && CHANGELOG="${CHANGELOG}### Dokumentation\n${DOCS}\n\n"
-          [ -n "$CHORES" ] && CHANGELOG="${CHANGELOG}### Maintenance\n${CHORES}\n\n"
+          [ -n "$CHORES" ] && CHANGELOG="${CHANGELOG}### Wartung\n${CHORES}\n\n"
           [ -n "$OTHERS" ] && CHANGELOG="${CHANGELOG}### Sonstiges\n${OTHERS}\n\n"
 
           if [ -z "$CHANGELOG" ]; then
@@ -197,7 +197,7 @@ jobs:
 
       - name: Create GitHub Release
         run: |
-          printf '%s' "$NOTES" > /tmp/release-notes.md
+          printf '%b' "$NOTES" > /tmp/release-notes.md
           gh release create "${{ github.ref_name }}" \
             --title "bldmrk ${{ github.ref_name }}" \
             --notes-file /tmp/release-notes.md
