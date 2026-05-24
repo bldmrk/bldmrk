@@ -163,7 +163,7 @@ jobs:
           REFACTORS=$(echo "$COMMITS" | grep -E '^- refactor(\(.+\))?:' || true)
           DOCS=$(echo "$COMMITS" | grep -E '^- docs(\(.+\))?:' || true)
           CHORES=$(echo "$COMMITS" | grep -E '^- (chore|test|ci)(\(.+\))?:' || true)
-          OTHERS=$(echo "$COMMITS" | grep -Ev '^- (feat|fix|refactor|docs|chore|test|ci)(\(.+\))?:' || true)
+          OTHERS=$(echo "$COMMITS" | grep -E '^- ' | grep -Ev '^- (feat|fix|refactor|docs|chore|test|ci)(\(.+\))?:' || true)
 
           CHANGELOG=""
           [ -n "$FEATURES" ] && CHANGELOG="${CHANGELOG}### Features\n${FEATURES}\n\n"
@@ -184,15 +184,16 @@ jobs:
           # Mehrzeiligen Output sicher in GITHUB_OUTPUT schreiben
           {
             echo "NOTES<<EOF"
-            printf "%b" "$CHANGELOG"
-            echo ""
+            echo "$CHANGELOG"
             echo "EOF"
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         run: |
+          printf '%s' "$NOTES" > /tmp/release-notes.md
           gh release create "${{ github.ref_name }}" \
             --title "bldmrk ${{ github.ref_name }}" \
-            --notes "${{ steps.changelog.outputs.NOTES }}"
+            --notes-file /tmp/release-notes.md
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTES: ${{ steps.changelog.outputs.NOTES }}
